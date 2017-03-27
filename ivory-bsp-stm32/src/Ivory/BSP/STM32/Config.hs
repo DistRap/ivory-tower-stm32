@@ -4,6 +4,7 @@ module Ivory.BSP.STM32.Config
   ( STM32Config(..)
   , Processor(..)
   , PX4Version(..)
+  , stm32f303Defaults
   , stm32f405Defaults
   , stm32f427Defaults
   , px4versionParser
@@ -31,6 +32,14 @@ data PX4Version
   = PX4FMU_v1
   | PX4FMU_v2
   deriving (Eq, Show)
+
+stm32f303Defaults :: Integer -> STM32Config
+stm32f303Defaults xtal_mhz = STM32Config
+  { stm32config_processor  = STM32F303
+  , stm32config_px4version = Nothing
+  , stm32config_clock      = externalXtal xtal_mhz 72
+  , stm32config_sram       = 48 * 1024
+  }
 
 stm32f405Defaults :: Integer -> STM32Config
 stm32f405Defaults xtal_mhz = STM32Config

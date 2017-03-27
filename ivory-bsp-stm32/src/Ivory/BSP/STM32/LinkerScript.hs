@@ -16,6 +16,14 @@ linker_script name p bl_offset reset_handler =
   -- Yeah yeah i know that these parts are available in variations with differnt
   -- flash lengths but i dont really want to encode that kind of complexity
   -- until its actually necessary
+  attrs STM32F303 =
+    [("flash_origin" , show $ 0x08000000 + bl_offset)
+    ,("flash_length" , show $ (kbytes 256) - bl_offset)
+    ,("sram_length"  , show $ f303_sram_length)
+    ,("ccsram_length", show $ ccsram_length)
+    ,("estack"       , show $ 0x20000000 + f303_sram_length)
+    ,("reset_handler", reset_handler)
+    ]
   attrs STM32F405 =
     [("flash_origin" , show $ 0x08000000 + bl_offset)
     ,("flash_length" , show $ (kbytes 1024) - bl_offset)
@@ -33,6 +41,9 @@ linker_script name p bl_offset reset_handler =
     ,("reset_handler", reset_handler)
     ]
 
+  f303_sram_length :: Integer
+  -- XXX; 48!!
+  f303_sram_length = kbytes 32 --  sum [sram1_length, sram2_length]
   f405_sram_length :: Integer
   f405_sram_length = sum [sram1_length, sram2_length]
   f427_sram_length :: Integer

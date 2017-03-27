@@ -13,6 +13,8 @@ import Ivory.BSP.ARMv7M.Exception
 import Ivory.BSP.STM32.Interrupt
 import Ivory.BSP.STM32.Processor
 
+
+import qualified Ivory.BSP.STM32F303.Interrupt as F303
 import qualified Ivory.BSP.STM32F405.Interrupt as F405
 import qualified Ivory.BSP.STM32F427.Interrupt as F427
 
@@ -25,6 +27,7 @@ vector_table processor =
   where
   fname = "support/vector_table.s.template"
   as = case processor of
+    STM32F303 -> attrs F303.WWDG
     STM32F405 -> attrs F405.WWDG
     STM32F427 -> attrs F427.WWDG
 

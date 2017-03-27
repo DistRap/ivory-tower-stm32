@@ -108,6 +108,14 @@ library
 
                        Ivory.BSP.STM32.Driver.DMA,
 
+                       Ivory.BSP.STM32F303.MemoryMap,
+                       Ivory.BSP.STM32F303.Interrupt,
+                       Ivory.BSP.STM32F303.GPIO,
+                       Ivory.BSP.STM32F303.GPIO.AF,
+                       Ivory.BSP.STM32F303.GPIO.Ports,
+                       Ivory.BSP.STM32F303.GPIO.Pins,
+                       Ivory.BSP.STM32F303.RCC,
+
                        Ivory.BSP.STM32F405.MemoryMap,
                        Ivory.BSP.STM32F405.Interrupt,
                        Ivory.BSP.STM32F405.CAN,

@@ -25,6 +25,9 @@ module BSP.Tests.Platforms
 import Ivory.Tower.Config
 import Data.Char (toUpper)
 
+import qualified Ivory.BSP.STM32F303.GPIO        as F303
+import qualified Ivory.BSP.STM32F303.GPIO.AF     as F303
+
 import qualified Ivory.BSP.STM32F405.CAN         as F405
 import qualified Ivory.BSP.STM32F405.UART        as F405
 import qualified Ivory.BSP.STM32F405.GPIO        as F405
@@ -60,6 +63,7 @@ testPlatformParser = do
   case map toUpper p of
     "PX4FMUV17"       -> result px4fmuv17
     "PX4FMUV17_IOAR"  -> result px4fmuv17_ioar
+    "F3DISCOVERY"     -> result f3discovery
     "F4DISCOVERY"     -> result f4discovery
     "OPEN407VC"       -> result open407vc
     "PORT407Z"        -> result port407z
@@ -175,6 +179,45 @@ px4fmuv17_ioar = px4fmuv17
           , uartPinAF = F405.gpio_af_uart1
           }
     }
+  }
+
+
+---------- F3Discovery --------------------------------------------------------
+
+f3discovery :: TestPlatform
+f3discovery = TestPlatform
+  { testplatform_leds = ColoredLEDs
+      { redLED  = LED F303.pinE8 ActiveHigh
+      , blueLED = LED F303.pinE9 ActiveHigh
+      }
+--  , testplatform_uart = TestUART
+--      { testUARTPeriph = F405.uart1
+--      , testUARTPins = UARTPins
+--          { uartPinTx = F405.pinB6
+--          , uartPinRx = F405.pinB7
+--          , uartPinAF = F405.gpio_af_uart1
+--          }
+--      }
+--  , testplatform_spi = TestSPI
+--      { testSPIPeriph = F405.spi3
+--      , testSPIPins   = spi3_pins
+--      }
+--  , testplatform_i2c = TestI2C
+--      { testI2C = F405.i2c1
+--      , testI2CPins = I2CPins
+--        { i2cpins_sda = F405.pinB6
+--        , i2cpins_scl = F405.pinB7
+--        }
+--      }
+--  , testplatform_can = TestCAN
+--      { testCAN = F405.can1
+--      , testCANRX = F405.pinD0
+--      , testCANTX = F405.pinD1
+--      , testCANFilters = F405.canFilters
+--      }
+--  , testplatform_dma = error "DMA tests not supported on this platform"
+--  , testplatform_rng = F405.rng
+  , testplatform_stm32 = stm32f303Defaults 8
   }
 
 ---------- F4Discovery --------------------------------------------------------
