@@ -131,20 +131,20 @@ uartTowerMonitor tocc uart pins baud interrupt rx_chan req_chan resp_chan dbg = 
     resp_emitter <- emitter resp_chan 1
     callback $ const $ do
       debug_evthandler_start dbg
-      sr <- getReg (uartRegSR uart)
-      when (bitToBool (sr #. uart_sr_orne)) $ do
+      sr <- getReg (uartRegISR uart)
+      when (bitToBool (sr #. uart_isr_orne)) $ do
         byte <- readDR uart
         bref <- local (ival byte)
         emit i (constRef bref)
         rxoverruns %= (+1) -- This is basically an error we can't handle, but its
                            -- useful to be able to check them with gdb
-      when (bitToBool (sr #. uart_sr_rxne)) $ do
+      when (bitToBool (sr #. uart_isr_rxne)) $ do
         byte <- readDR uart
         bref <- local (ival byte)
         emit i (constRef bref)
         rxsuccess %= (+1) -- For debugging
 
-      when (bitToBool (sr #. uart_sr_txe)) $ do
+      when (bitToBool (sr #. uart_isr_txe)) $ do
         byte <- local (ival 0)
         rv   <- req_pop_byte byte
         ifte_ rv

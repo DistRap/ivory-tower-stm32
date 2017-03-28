@@ -159,7 +159,7 @@ dmaUARTTransmitMonitor uart txstream req_chan resp_chan init_chan = do
 
     -- Set peripheral address:
     setReg (dmaStreamPAR tx_regs) $
-      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegDR uart)))
+      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegTDR uart)))
 
     -- Set memory address:
     buf_start_addr <- call ref_to_uint32_proc ((req_buf ~> stringDataL) ! 0)
@@ -204,8 +204,8 @@ dmaUARTTransmitMonitor uart txstream req_chan resp_chan init_chan = do
       setField uart_cr3_dmat (fromRep 1)
 
     -- Clear TC in UART, per STM32 reference RM0090 section 30.3.13
-    modifyReg (uartRegSR uart) $ do
-      setField uart_sr_tc (fromRep 0)
+    modifyReg (uartRegISR uart) $ do
+      setField uart_isr_tc (fromRep 0)
 
     -- Set control register:
     modifyReg (dmaStreamCR tx_regs) $ do
@@ -273,7 +273,7 @@ dmaUARTReceiveMonitor uart rxstream out_chan flush_chan init_chan = do
   handler init_chan "dmauart_rx_init" $ callback $ const $ do
     -- Set peripheral address:
     setReg (dmaStreamPAR rx_regs) $
-      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegDR uart)))
+      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegRDR uart)))
 
     -- Set memory address:
     buf0_start_addr <- call ref_to_uint32_proc ((rx0_buf ~> stringDataL) ! 0)

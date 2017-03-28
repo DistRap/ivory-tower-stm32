@@ -147,9 +147,10 @@ syncDMAMonitor uart txstream rxstream flush_chan req_chan rx_chan init_chan init
     -- Clear transmit stream flags:
     dma_stream_clear_isrflags txstream
 
+    -- XXX: NOT SURE about TDR/RDR
     -- Set peripheral address:
     setReg (dmaStreamPAR tx_regs) $
-      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegDR uart)))
+      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegTDR uart)))
 
     -- Set memory address:
     buf_start_addr <- call ref_to_uint32_proc ((req_buf ~> stringDataL) ! 0)
@@ -194,14 +195,14 @@ syncDMAMonitor uart txstream rxstream flush_chan req_chan rx_chan init_chan init
       setField uart_cr3_dmat (fromRep 1)
 
     -- Clear TC in UART, per STM32 reference RM0090 section 30.3.13
-    modifyReg (uartRegSR uart) $ do
-      setField uart_sr_tc (fromRep 0)
+    modifyReg (uartRegISR uart) $ do
+      setField uart_isr_tc (fromRep 0)
 
     -------------------------------------------------------------------------
 
     -- Set peripheral address:
     setReg (dmaStreamPAR rx_regs) $
-      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegDR uart)))
+      setField dma_sxpar_par (fromRep (bdr_reg_addr (uartRegRDR uart)))
 
     -- Set memory address:
     rxbuf_start_addr <- call ref_to_uint32_proc ((rx_buf ~> stringDataL) ! 0)

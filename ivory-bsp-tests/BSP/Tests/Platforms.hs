@@ -25,6 +25,7 @@ module BSP.Tests.Platforms
 import Ivory.Tower.Config
 import Data.Char (toUpper)
 
+import qualified Ivory.BSP.STM32F303.UART        as F303
 import qualified Ivory.BSP.STM32F303.GPIO        as F303
 import qualified Ivory.BSP.STM32F303.GPIO.AF     as F303
 
@@ -190,14 +191,14 @@ f3discovery = TestPlatform
       { redLED  = LED F303.pinE8 ActiveHigh
       , blueLED = LED F303.pinE9 ActiveHigh
       }
---  , testplatform_uart = TestUART
---      { testUARTPeriph = F405.uart1
---      , testUARTPins = UARTPins
---          { uartPinTx = F405.pinB6
---          , uartPinRx = F405.pinB7
---          , uartPinAF = F405.gpio_af_uart1
---          }
---      }
+  , testplatform_uart = TestUART
+      { testUARTPeriph = F303.uart1
+      , testUARTPins = UARTPins
+          { uartPinTx = F303.pinC4
+          , uartPinRx = F303.pinC5
+          , uartPinAF = F303.gpio_af_uart1
+          }
+      }
 --  , testplatform_spi = TestSPI
 --      { testSPIPeriph = F405.spi3
 --      , testSPIPins   = spi3_pins

@@ -25,15 +25,18 @@ import Ivory.BSP.STM32.Peripheral.GPIOF4
 import Ivory.BSP.STM32.Peripheral.UART.Types
 import Ivory.BSP.STM32.Peripheral.UART.Regs
 
-
 data UART = UART
-  { uartRegSR      :: BitDataReg UART_SR
-  , uartRegDR      :: BitDataReg UART_DR
-  , uartRegBRR     :: BitDataReg UART_BRR
-  , uartRegCR1     :: BitDataReg UART_CR1
+  { uartRegCR1     :: BitDataReg UART_CR1
   , uartRegCR2     :: BitDataReg UART_CR2
   , uartRegCR3     :: BitDataReg UART_CR3
+  , uartRegBRR     :: BitDataReg UART_BRR
   , uartRegGTPR    :: BitDataReg UART_GTPR
+  , uartRegRTOR    :: BitDataReg UART_RTOR
+  , uartRegRQR     :: BitDataReg UART_RQR
+  , uartRegISR     :: BitDataReg UART_ISR
+  , uartRegICR     :: BitDataReg UART_ICR
+  , uartRegRDR     :: BitDataReg UART_RDR
+  , uartRegTDR     :: BitDataReg UART_TDR
   , uartRCCEnable  :: forall eff . Ivory eff ()
   , uartRCCDisable :: forall eff . Ivory eff ()
   , uartInterrupt  :: HasSTM32Interrupt
@@ -41,6 +44,21 @@ data UART = UART
   , uartName       :: String
   }
 
+--data UART = UART
+--  { uartRegSR      :: BitDataReg UART_SR
+--  , uartRegDR      :: BitDataReg UART_DR
+--  , uartRegBRR     :: BitDataReg UART_BRR
+--  , uartRegCR1     :: BitDataReg UART_CR1
+--  , uartRegCR2     :: BitDataReg UART_CR2
+--  , uartRegCR3     :: BitDataReg UART_CR3
+--  , uartRegGTPR    :: BitDataReg UART_GTPR
+--  , uartRCCEnable  :: forall eff . Ivory eff ()
+--  , uartRCCDisable :: forall eff . Ivory eff ()
+--  , uartInterrupt  :: HasSTM32Interrupt
+--  , uartPClk       :: PClk
+--  , uartName       :: String
+--  }
+--
 data UARTPins = UARTPins
   { uartPinTx      :: GPIOPin
   , uartPinRx      :: GPIOPin
@@ -56,13 +74,17 @@ mkUART :: (STM32Interrupt i)
        -> String
        -> UART
 mkUART base rccen rccdis interrupt pclk n = UART
-  { uartRegSR      = reg 0x00 "sr"
-  , uartRegDR      = reg 0x04 "dr"
-  , uartRegBRR     = reg 0x08 "brr"
-  , uartRegCR1     = reg 0x0C "cr1"
-  , uartRegCR2     = reg 0x10 "cr2"
-  , uartRegCR3     = reg 0x14 "cr3"
-  , uartRegGTPR    = reg 0x18 "gtpr"
+  { uartRegCR1     = reg 0x00 "cr1"
+  , uartRegCR2     = reg 0x04 "cr2"
+  , uartRegCR3     = reg 0x08 "cr3"
+  , uartRegBRR     = reg 0x0C "brr"
+  , uartRegGTPR    = reg 0x10 "gtpr"
+  , uartRegRTOR    = reg 0x14 "rtor"
+  , uartRegRQR     = reg 0x18 "rtor"
+  , uartRegISR     = reg 0x1C "isr"
+  , uartRegICR     = reg 0x20 "icr"
+  , uartRegRDR     = reg 0x24 "rdr"
+  , uartRegTDR     = reg 0x28 "tdr"
   , uartRCCEnable  = rccen
   , uartRCCDisable = rccdis
   , uartInterrupt  = HasSTM32Interrupt interrupt
@@ -72,6 +94,24 @@ mkUART base rccen rccdis interrupt pclk n = UART
   where
   reg :: (IvoryIOReg (BitDataRep d)) => Integer -> String -> BitDataReg d
   reg offs name = mkBitDataRegNamed (base + offs) (n ++ "->" ++ name)
+
+--mkUART base rccen rccdis interrupt pclk n = UART
+--  { uartRegSR      = reg 0x00 "sr"
+--  , uartRegDR      = reg 0x04 "dr"
+--  , uartRegBRR     = reg 0x08 "brr"
+--  , uartRegCR1     = reg 0x0C "cr1"
+--  , uartRegCR2     = reg 0x10 "cr2"
+--  , uartRegCR3     = reg 0x14 "cr3"
+--  , uartRegGTPR    = reg 0x18 "gtpr"
+--  , uartRCCEnable  = rccen
+--  , uartRCCDisable = rccdis
+--  , uartInterrupt  = HasSTM32Interrupt interrupt
+--  , uartPClk       = pclk
+--  , uartName       = n
+--  }
+--  where
+--  reg :: (IvoryIOReg (BitDataRep d)) => Integer -> String -> BitDataReg d
+--  reg offs name = mkBitDataRegNamed (base + offs) (n ++ "->" ++ name)
 
 
 
@@ -105,16 +145,16 @@ setBaudRate uart clockconfig baud = do
     setField uart_brr_div (fromRep (lbits brr))
 
 -- | Configure the stop bits for a UART.
-setStopBits :: UART -> UART_StopBits -> Ivory eff ()
-setStopBits uart x =
-  modifyReg (uartRegCR2 uart) $
-    setField uart_cr2_stop x
-
--- | Configure the word length for a UART.
-setWordLen :: UART -> UART_WordLen -> Ivory eff ()
-setWordLen uart x =
-  modifyReg (uartRegCR1 uart) $
-    setField uart_cr1_m x
+--setStopBits :: UART -> UART_StopBits -> Ivory eff ()
+--setStopBits uart x =
+--  modifyReg (uartRegCR2 uart) $
+--    setField uart_cr2_stop x
+--
+---- | Configure the word length for a UART.
+--setWordLen :: UART -> UART_WordLen -> Ivory eff ()
+--setWordLen uart x =
+--  modifyReg (uartRegCR1 uart) $
+--    setField uart_cr1_m x
 
 -- | Configure the parity setting for a UART.
 setParity :: UART -> IBool -> Ivory eff ()
@@ -133,8 +173,8 @@ uartInit uart pins clockconfig baud useinterrupts = do
 
   -- Initialize the baud rate and other settings.
   setBaudRate uart clockconfig baud
-  setStopBits uart uart_stop_bits_1_0
-  setWordLen  uart uart_word_len_8
+  --setStopBits uart uart_stop_bits_1_0
+  --setWordLen  uart uart_word_len_8
   setParity   uart false
 
   interrupt_enable $ uartInterrupt uart
@@ -161,14 +201,14 @@ uartInit uart pins clockconfig baud useinterrupts = do
 -- | Set the UART data register.
 setDR :: UART -> Uint8 -> Ivory eff ()
 setDR uart b =
-  setReg (uartRegDR uart) $
-    setField uart_dr_data (fromRep b)
+  setReg (uartRegTDR uart) $
+    setField uart_tdr_data (fromRep b)
 
 -- | Read the UART data register.
 readDR :: UART -> Ivory eff Uint8
 readDR uart = do
-  dr <- getReg (uartRegDR uart)
-  return (toRep (dr #. uart_dr_data))
+  dr <- getReg (uartRegRDR uart)
+  return (toRep (dr #. uart_rdr_data))
 
 -- | Enable or disable the "TXE" interrupt.
 setTXEIE :: UART -> IBool -> Ivory eff ()
