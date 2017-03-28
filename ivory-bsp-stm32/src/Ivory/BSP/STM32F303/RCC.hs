@@ -14,29 +14,19 @@ module Ivory.BSP.STM32F303.RCC where
 import Ivory.Language
 import Ivory.HW
 
-import Ivory.BSP.STM32.MemoryMap (rcc_periph_base)
+import Ivory.BSP.STM32F303.MemoryMap (rcc_periph_base)
 
 -- AHB Peripheral Clock Enable Registers ---------------------------------------
 
+-- XXX: technically this is AHBENR
 [ivory|
  bitdata RCC_AHB1ENR :: Bits 32 = rcc_ahb1enr
   { _                     :: Bit
-  , rcc_ahb1en_otg_hsulpi :: Bit
-  , rcc_ahb1en_otg_hs     :: Bit
-  , rcc_ahb1en_ethmactx   :: Bit
-  , rcc_ahb1en_ethmacrx   :: Bit
-  , rcc_ahb1en_ethmac     :: Bit
-  , _                     :: Bits 2
-  , rcc_ahb1en_dma2       :: Bit
-  , rcc_ahb1en_dma1       :: Bit
-  , rcc_ahb1en_ccmdataram :: Bit
   , _                     :: Bit
-  , rcc_ahb1en_bkpsram    :: Bit
-  , _                     :: Bits 5
-  , rcc_ahb1en_crc        :: Bit
+  , rcc_ahb1en_adc34      :: Bit
+  , rcc_ahb1en_adc12      :: Bit
   , _                     :: Bits 3
-  , rcc_ahb1en_gpioi      :: Bit
-  , rcc_ahb1en_gpioh      :: Bit
+  , rcc_ahb1en_ts         :: Bit -- touch sensing
   , rcc_ahb1en_gpiog      :: Bit
   , rcc_ahb1en_gpiof      :: Bit
   , rcc_ahb1en_gpioe      :: Bit
@@ -44,11 +34,20 @@ import Ivory.BSP.STM32.MemoryMap (rcc_periph_base)
   , rcc_ahb1en_gpioc      :: Bit
   , rcc_ahb1en_gpiob      :: Bit
   , rcc_ahb1en_gpioa      :: Bit
+  , rcc_ahb1en_gpioh      :: Bit
+  , _                     :: Bits 9
+  , rcc_ahb1en_crc        :: Bit
+  , rcc_ahb1en_fmc        :: Bit -- flexible memory controller
+  , rcc_ahb1en_flitf      :: Bit
+  , _                     :: Bit
+  , rcc_ahb1en_sram       :: Bit -- enable SRAM clock during sleep mode
+  , rcc_ahb1en_dma2       :: Bit
+  , rcc_ahb1en_dma1       :: Bit
   }
 |]
 
 regRCC_AHB1ENR :: BitDataReg RCC_AHB1ENR
-regRCC_AHB1ENR = mkBitDataRegNamed (rcc_periph_base + 0x30) "rcc_ahb1enr"
+regRCC_AHB1ENR = mkBitDataRegNamed (rcc_periph_base + 0x14) "rcc_ahb1enr"
 
 [ivory|
  bitdata RCC_AHB2ENR :: Bits 32 = rcc_ahb2enr
@@ -79,14 +78,15 @@ regRCC_AHB3ENR = mkBitDataRegNamed (rcc_periph_base + 0x38) "rcc_ahb3enr"
 
 [ivory|
  bitdata RCC_APB1ENR :: Bits 32 = rcc_apb1enr
-  { _                     :: Bits 2
-  , rcc_apb1en_dac        :: Bit
+  { _                     :: Bit
+  , rcc_apb1en_i2c3       :: Bit
+  , rcc_apb1en_dac1       :: Bit
   , rcc_apb1en_pwr        :: Bit
   , _                     :: Bit
-  , rcc_apb1en_can2       :: Bit
-  , rcc_apb1en_can1       :: Bit
+  , rcc_apb1en_dac2       :: Bit
+  , rcc_apb1en_can        :: Bit
   , _                     :: Bit
-  , rcc_apb1en_i2c3       :: Bit
+  , rcc_apb1en_usb        :: Bit
   , rcc_apb1en_i2c2       :: Bit
   , rcc_apb1en_i2c1       :: Bit
   , rcc_apb1en_uart5      :: Bit
@@ -98,13 +98,10 @@ regRCC_AHB3ENR = mkBitDataRegNamed (rcc_periph_base + 0x38) "rcc_ahb3enr"
   , rcc_apb1en_spi2       :: Bit
   , _                     :: Bits 2
   , rcc_apb1en_wwdg       :: Bit
-  , _                     :: Bits 2
-  , rcc_apb1en_tim14      :: Bit
-  , rcc_apb1en_tim13      :: Bit
-  , rcc_apb1en_tim12      :: Bit
+  , _                     :: Bits 5
   , rcc_apb1en_tim7       :: Bit
   , rcc_apb1en_tim6       :: Bit
-  , rcc_apb1en_tim5       :: Bit
+  , _                     :: Bit
   , rcc_apb1en_tim4       :: Bit
   , rcc_apb1en_tim3       :: Bit
   , rcc_apb1en_tim2       :: Bit
@@ -112,33 +109,28 @@ regRCC_AHB3ENR = mkBitDataRegNamed (rcc_periph_base + 0x38) "rcc_ahb3enr"
 |]
 
 regRCC_APB1ENR :: BitDataReg RCC_APB1ENR
-regRCC_APB1ENR = mkBitDataRegNamed (rcc_periph_base + 0x40) "rcc_apb1enr"
+regRCC_APB1ENR = mkBitDataRegNamed (rcc_periph_base + 0x1C) "rcc_apb1enr"
 
 [ivory|
  bitdata RCC_APB2ENR :: Bits 32 = rcc_apb2enr
-  { _                     :: Bits 13
-  , rcc_apb2en_tim11      :: Bit
-  , rcc_apb2en_tim10      :: Bit
-  , rcc_apb2en_tim9       :: Bit
+  { _                     :: Bits 11
+  , rcc_apb2en_tim20      :: Bit
   , _                     :: Bit
-  , rcc_apb2en_syscfg     :: Bit
-  , _                     :: Bit
-  , rcc_apb2en_spi1       :: Bit
-  , rcc_apb2en_sdio       :: Bit
-  , rcc_apb2en_adc3       :: Bit
-  , rcc_apb2en_adc2       :: Bit
-  , rcc_apb2en_adc1       :: Bit
-  , _                     :: Bits 2
-  , rcc_apb2en_uart6      :: Bit
-  , rcc_apb2en_uart1      :: Bit
-  , _                     :: Bits 2
+  , rcc_apb2en_tim17      :: Bit
+  , rcc_apb2en_tim16      :: Bit
+  , rcc_apb2en_tim15      :: Bit
+  , rcc_apb2en_spi4       :: Bit
+  , rcc_apb2en_uart1      :: Bit -- USART1
   , rcc_apb2en_tim8       :: Bit
+  , rcc_apb2en_spi1       :: Bit
   , rcc_apb2en_tim1       :: Bit
+  , _                     :: Bits 10
+  , rcc_apb2en_syscfg     :: Bit
   }
 |]
 
 regRCC_APB2ENR :: BitDataReg RCC_APB2ENR
-regRCC_APB2ENR = mkBitDataRegNamed (rcc_periph_base + 0x44) "rcc_apb2enr"
+regRCC_APB2ENR = mkBitDataRegNamed (rcc_periph_base + 0x18) "rcc_apb2enr"
 
 -- APB Peripheral Reset Registers ----------------------------------------------
 
@@ -153,4 +145,4 @@ regRCC_APB2ENR = mkBitDataRegNamed (rcc_periph_base + 0x44) "rcc_apb2enr"
 |]
 
 regRCC_APB1RSTR :: BitDataReg RCC_APB1RSTR
-regRCC_APB1RSTR = mkBitDataRegNamed (rcc_periph_base + 0x20) "rcc_apb1rstr"
+regRCC_APB1RSTR = mkBitDataRegNamed (rcc_periph_base + 0x10) "rcc_apb1rstr"

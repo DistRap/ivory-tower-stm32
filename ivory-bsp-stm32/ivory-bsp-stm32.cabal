@@ -115,6 +115,11 @@ library
                        Ivory.BSP.STM32F303.GPIO.Ports,
                        Ivory.BSP.STM32F303.GPIO.Pins,
                        Ivory.BSP.STM32F303.RCC,
+                       Ivory.BSP.STM32F303.Peripheral.RCC,
+                       Ivory.BSP.STM32F303.Peripheral.RCC.Regs,
+                       Ivory.BSP.STM32F303.Peripheral.RCC.RegTypes,
+                       Ivory.BSP.STM32F303.Peripheral.Flash,
+                       Ivory.BSP.STM32F303.Peripheral.Flash.Regs,
 
                        Ivory.BSP.STM32F405.MemoryMap,
                        Ivory.BSP.STM32F405.Interrupt,

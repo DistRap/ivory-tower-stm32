@@ -15,8 +15,8 @@ import Ivory.HW
 
 import Ivory.BSP.STM32.Peripheral.GPIOF4.Peripheral
 
-import Ivory.BSP.STM32F303.RCC
 import Ivory.BSP.STM32F303.MemoryMap
+import Ivory.BSP.STM32F303.RCC
 
 gpioA :: GPIOPort
 gpioA = mkGPIOPort gpioa_periph_base
