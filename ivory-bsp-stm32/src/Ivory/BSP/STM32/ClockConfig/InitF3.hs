@@ -1,8 +1,10 @@
-{-# LANGUAGE TypeOperators #-}
+
+ {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RecordWildCards #-}
 
-module Ivory.BSP.STM32.ClockConfig.InitF4
+module Ivory.BSP.STM32.ClockConfig.InitF3
   ( init_clocks
   ) where
 
@@ -11,9 +13,9 @@ import Ivory.Stdlib
 import Ivory.HW
 
 import Ivory.BSP.STM32.ClockConfig
-import Ivory.BSP.STM32.Peripheral.Flash
+import Ivory.BSP.STM32F303.Peripheral.Flash
 import Ivory.BSP.STM32.Peripheral.PWR
-import Ivory.BSP.STM32.Peripheral.RCC
+import Ivory.BSP.STM32F303.Peripheral.RCC
 
 init_clocks :: ClockConfig -> Def('[]':->())
 init_clocks clockconfig = proc "init_clocks" $ body $ do
@@ -25,31 +27,26 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
 
   -- RCC clock config to default reset state
   modifyReg (rcc_reg_cr rcc) $ setBit rcc_cr_hsi_on
+
   modifyReg (rcc_reg_cfgr rcc) $ do
-    setField rcc_cfgr_mco2     rcc_mcox_sysclk
-    setField rcc_cfgr_mco2_pre rcc_mcoxpre_none
-    setField rcc_cfgr_mco1_pre rcc_mcoxpre_none
-    clearBit rcc_cfgr_i2ssrc
-    setField rcc_cfgr_mco1     rcc_mcox_sysclk
-    setField rcc_cfgr_rtcpre   (fromRep 0)
+--    setField rcc_cfgr_mco2     rcc_mcox_sysclk
+--    setField rcc_cfgr_mco2_pre rcc_mcoxpre_none
+--    setField rcc_cfgr_mco1_pre rcc_mcoxpre_none
+--    clearBit rcc_cfgr_i2ssrc
+--    setField rcc_cfgr_mco1     rcc_mcox_sysclk
+--    setField rcc_cfgr_rtcpre   (fromRep 0)
     setField rcc_cfgr_ppre2    rcc_pprex_none
     setField rcc_cfgr_ppre1    rcc_pprex_none
     setField rcc_cfgr_hpre     rcc_hpre_none
-    setField rcc_cfgr_sws      rcc_sysclk_hsi
+    -- FIXME: maybe bug - sw instead of sws
+    --setField rcc_cfgr_sws      rcc_sysclk_hsi
+    setField rcc_cfgr_sw      rcc_sysclk_hsi
 
   -- Reset HSEOn, CSSOn, PLLOn bits
   modifyReg (rcc_reg_cr rcc) $ do
     clearBit rcc_cr_hse_on
     clearBit rcc_cr_css_on
     clearBit rcc_cr_pll_on
-
-  -- Reset PLLCFGR register
-  modifyReg (rcc_reg_pllcfgr rcc) $ do
-    setField rcc_pllcfgr_pllq   (fromRep 2)
-    clearBit rcc_pllcfgr_pllsrc -- use HSI
-    setField rcc_pllcfgr_pllp   rcc_pllp_div2
-    setField rcc_pllcfgr_plln   (fromRep 192)
-    setField rcc_pllcfgr_pllm   (fromRep 16)
 
   -- Reset HSEBYP bit
   modifyReg (rcc_reg_cr rcc) $ clearBit rcc_cr_hse_byp
@@ -76,12 +73,14 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
           store hserdy true
           breakOut
 
-
       success <- deref hserdy
       when success $ do
         -- Set PLL to use external clock:
-        modifyReg (rcc_reg_pllcfgr rcc) $ do
-          setBit rcc_pllcfgr_pllsrc -- use HSE
+        modifyReg (rcc_reg_cfgr rcc) $ do
+          -- use HSE
+          setField rcc_cfgr_pllsrc rcc_cfgr_pllsrc_hse_div1
+      --  modifyReg (rcc_reg_pllcfgr rcc) $ do
+      --    setBit rcc_pllcfgr_pllsrc -- use HSE
 
       -- Handle exception case when HSERDY fails.
       unless success $ do
@@ -95,19 +94,27 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
 
   -- Select bus clock dividers
   modifyReg (rcc_reg_cfgr rcc) $ do
+    setBit   rcc_cfgr_pllnodiv
+
+    setField rcc_cfgr_pllsrc rcc_cfgr_pllsrc_hse_div1
+    setField rcc_cfgr_pllmul rcc_cfgr_pllmul_x9
+
     setField rcc_cfgr_hpre  hpre_divider
     setField rcc_cfgr_ppre1 ppre1_divider
     setField rcc_cfgr_ppre2 ppre2_divider
 
   -- Configure main PLL:
-  modifyReg (rcc_reg_pllcfgr rcc) $ do
-    setField rcc_pllcfgr_pllm m
-    setField rcc_pllcfgr_plln n
-    setField rcc_pllcfgr_pllp p
-    setField rcc_pllcfgr_pllq q
+  case clockconfig_pll cc of
+    PLLFactor{..} -> error "No PLL on F3, use PLLMFactor"
+    PLLMFactor{..} ->
+      modifyReg (rcc_reg_cfgr rcc) $ do
+                    setBit   rcc_cfgr_pllnodiv
+                    setField rcc_cfgr_pllsrc rcc_cfgr_pllsrc_hse_div1
+                    setField rcc_cfgr_pllmul rcc_cfgr_pllmul_x9
 
   -- Enable main PLL:
-  modifyReg (rcc_reg_cr rcc) $ setBit rcc_cr_pll_on
+  modifyReg (rcc_reg_cr rcc) $ do
+    setBit rcc_cr_pll_on
   -- Spin until RCC->CR PLLRDY bit is high
   forever $ do
     cr <- getReg (rcc_reg_cr rcc)
@@ -129,27 +136,8 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
     when ((cfgr #. rcc_cfgr_sws) ==? rcc_sysclk_pll) $ breakOut
 
   where
-  cc = if clockPLL48ClkHz clockconfig == 48 * 1000 * 1000
-          then clockconfig
-          else error "ClockConfig invalid: 48MHz peripheral clock is wrong speed"
-  mm = pll_m (clockconfig_pll cc)
-  m = if mm > 1 && mm < 64
-         then fromRep (fromIntegral mm)
-         else error "platformClockConfig pll_m not in valid range"
-  nn = pll_n (clockconfig_pll cc)
-  n = if nn > 191 && nn < 433
-         then fromRep (fromIntegral nn)
-         else error "platformClockConfig pll_n not in valid range"
-  p = case pll_p (clockconfig_pll cc) of
-        2 -> rcc_pllp_div2
-        4 -> rcc_pllp_div4
-        6 -> rcc_pllp_div6
-        8 -> rcc_pllp_div8
-        _ -> error "platformClockConfig pll_p not in valid range"
-  qq = pll_q (clockconfig_pll cc)
-  q = if qq > 1 && qq < 16
-         then fromRep (fromIntegral qq)
-         else error "platformClockConfig pll_q not in valid range"
+  cc = clockconfig
+
   hpre_divider = case clockconfig_hclk_divider cc of
     1   -> rcc_hpre_none
     2   -> rcc_hpre_div2
@@ -177,4 +165,3 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
     8  -> rcc_pprex_div8
     16 -> rcc_pprex_div16
     _  -> error "platformClockConfig pclk2 divider not in valid range"
-

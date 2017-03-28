@@ -24,6 +24,8 @@ library
                        Ivory.BSP.STM32.Config,
                        Ivory.BSP.STM32.ClockConfig,
                        Ivory.BSP.STM32.ClockConfig.Init,
+                       Ivory.BSP.STM32.ClockConfig.InitF3,
+                       Ivory.BSP.STM32.ClockConfig.InitF4,
                        Ivory.BSP.STM32.MemoryMap,
                        Ivory.BSP.STM32.Processor,
 

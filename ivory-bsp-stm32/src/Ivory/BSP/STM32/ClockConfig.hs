@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 
 module Ivory.BSP.STM32.ClockConfig where
 
@@ -10,6 +11,10 @@ data PLLFactor = PLLFactor
   , pll_n :: Integer
   , pll_p :: Integer
   , pll_q :: Integer
+  }
+ |  PLLMFactor
+  { pllm_m :: Integer -- HSE divider
+  , pllm_n :: Integer -- PLLMUL
   } deriving (Eq, Show)
 
 data ClockConfig =
@@ -26,20 +31,28 @@ clockSourceHz (External rate) = rate
 clockSourceHz Internal        = 16 * 1000 * 1000
 
 clockSysClkHz :: ClockConfig -> Integer
-clockSysClkHz cc = ((source `div` m) * n) `div` p
+clockSysClkHz
+  ClockConfig{clockconfig_source=csource, clockconfig_pll=PLLFactor{..}}
+    = ((source `div` pll_m) * pll_n) `div` pll_p
   where
-  source = clockSourceHz (clockconfig_source cc)
-  m      = pll_m         (clockconfig_pll cc)
-  n      = pll_n         (clockconfig_pll cc)
-  p      = pll_p         (clockconfig_pll cc)
+  source = clockSourceHz csource
+clockSysClkHz
+  ClockConfig{clockconfig_source=csource, clockconfig_pll=PLLMFactor{..}}
+    = ((source `div` pllm_m) * pllm_n)
+  where
+  source = clockSourceHz csource
 
 clockPLL48ClkHz :: ClockConfig -> Integer
-clockPLL48ClkHz cc = ((source `div` m) * n) `div` q
+clockPLL48ClkHz
+  ClockConfig{clockconfig_source=csource, clockconfig_pll=PLLFactor{..}}
+    = ((source `div` pll_m) * pll_n) `div` pll_q
   where
-  source = clockSourceHz (clockconfig_source cc)
-  m      = pll_m         (clockconfig_pll cc)
-  n      = pll_n         (clockconfig_pll cc)
-  q      = pll_q         (clockconfig_pll cc)
+  source = clockSourceHz csource
+clockPLL48ClkHz
+  ClockConfig{clockconfig_source=csource, clockconfig_pll=PLLMFactor{..}}
+    = 48 * 1000 * 1000  -- XXX: there's no PLL48CLK on F3, hack this for now
+  where
+  source = clockSourceHz csource
 
 clockHClkHz :: ClockConfig -> Integer
 clockHClkHz cc = clockSysClkHz cc `div` (clockconfig_hclk_divider cc)
@@ -56,20 +69,31 @@ clockPClkHz :: PClk -> ClockConfig -> Integer
 clockPClkHz PClk1 = clockPClk1Hz
 clockPClkHz PClk2 = clockPClk2Hz
 
-externalXtal :: Integer -> Integer -> ClockConfig
-externalXtal xtal_mhz sysclk_mhz = ClockConfig
+-- XXX: maybe make this a more general version?
+externalXtalPLL :: Integer -> Integer -> PLLFactor -> ClockConfig
+externalXtalPLL xtal_mhz sysclk_mhz pllconf = ClockConfig
   { clockconfig_source = External (xtal_mhz * 1000 * 1000)
-  , clockconfig_pll    = PLLFactor
-      { pll_m = xtal_mhz
+  , clockconfig_pll    = pllconf
+  , clockconfig_hclk_divider = 1
+  , clockconfig_pclk1_divider = 4 -- APB1 div 4
+  , clockconfig_pclk2_divider = 2 -- APB2 div 2
+  }
+
+externalXtal :: Integer -> Integer -> ClockConfig
+externalXtal xtal_mhz sysclk_mhz = externalXtalPLL xtal_mhz sysclk_mhz
+    PLLFactor
+      { pll_m = xtal_mhz  -- 8
       , pll_n = sysclk_mhz * p
       , pll_p = p
       , pll_q = 7
       }
-  , clockconfig_hclk_divider = 1
-  , clockconfig_pclk1_divider = 4
-  , clockconfig_pclk2_divider = 2
-  }
   where p = 2
+
+externalXtalF3 xtal_mhz sysclk_mhz = externalXtalPLL xtal_mhz sysclk_mhz
+    PLLMFactor
+      { pllm_m = 1 -- HSE div 1 or 2
+      , pllm_n = 9 -- PLLMUL
+      }
 
 clockConfigParser :: ConfigParser ClockConfig
 clockConfigParser = do

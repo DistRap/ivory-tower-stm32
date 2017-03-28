@@ -37,7 +37,7 @@ stm32f303Defaults :: Integer -> STM32Config
 stm32f303Defaults xtal_mhz = STM32Config
   { stm32config_processor  = STM32F303
   , stm32config_px4version = Nothing
-  , stm32config_clock      = externalXtal xtal_mhz 72
+  , stm32config_clock      = externalXtalF3 xtal_mhz 72
   , stm32config_sram       = 48 * 1024
   }
 
