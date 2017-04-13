@@ -26,10 +26,11 @@ import Ivory.BSP.STM32F303.MemoryMap (rcc_periph_base)
 
 data RCC =
   RCC
-    { rcc_reg_cr        :: BitDataReg RCC_CR
-    , rcc_reg_cfgr      :: BitDataReg RCC_CFGR
-    , rcc_reg_cir       :: BitDataReg RCC_CIR
-    , rcc_reg_apb1enr   :: BitDataReg RCC_APB1ENR
+    { rcc_reg_cr         :: BitDataReg RCC_CR
+    , rcc_reg_cfgr       :: BitDataReg RCC_CFGR
+    , rcc_reg_cir        :: BitDataReg RCC_CIR
+    , rcc_reg_cr2        :: BitDataReg RCC_CR2
+    , rcc_reg_apb1enr    :: BitDataReg RCC_APB1ENR
     }
 
 rcc :: RCC
@@ -38,4 +39,5 @@ rcc = RCC
   , rcc_reg_cfgr    = mkBitDataRegNamed (rcc_periph_base + 0x04) "rcc_cfgr"
   , rcc_reg_cir     = mkBitDataRegNamed (rcc_periph_base + 0x08) "rcc_cir"
   , rcc_reg_apb1enr = mkBitDataRegNamed (rcc_periph_base + 0x1c) "rcc_apb1enr"
+  , rcc_reg_cr2     = mkBitDataRegNamed (rcc_periph_base + 0x34) "rcc_cr2"
   }

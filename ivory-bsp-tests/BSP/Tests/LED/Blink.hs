@@ -34,11 +34,13 @@ blinker t = do
   p_chan <- period t
   (cin, cout) <- channel
   monitor "blinker" $ do
+    lastled <- stateInit "lastled" (ival false)
     handler p_chan "per" $  do
       e <- emitter cin 1
       callback $ \timeref -> do
         time <- deref timeref
         -- Emit boolean value which will alternate each period.
+        store lastled (time .% (2*p) <? p)
         emitV e (time .% (2*p) <? p)
   return cout
   where p = toITime t
@@ -47,4 +49,3 @@ blink :: Time a => a -> [LED] -> Tower p ()
 blink per pins = do
   onoff <- blinker per
   monitor "led" $ ledController pins onoff
-

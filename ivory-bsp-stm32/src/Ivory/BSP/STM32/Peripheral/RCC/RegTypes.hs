@@ -51,9 +51,9 @@ import Ivory.Language
   | rcc_hpre_div256   as 14 -- 0b1110
   | rcc_hpre_div512   as 15 -- 0b1111
 
- bitdata RCC_SYSCLK   :: Bits 2
-  = rcc_sysclk_hsi    as 0
-  | rcc_sysclk_hse    as 1
-  | rcc_sysclk_pll    as 2
-
+ bitdata RCC_SYSCLK    :: Bits 2
+  = rcc_sysclk_hsi     as 0
+  | rcc_sysclk_hse     as 1
+  | rcc_sysclk_pll     as 2
+  | rcc_sysclk_i48mhz  as 3 -- Only on selected MCU's (Internal 48MHz)
 |]

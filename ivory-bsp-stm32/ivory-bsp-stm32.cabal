@@ -80,6 +80,9 @@ library
                        Ivory.BSP.STM32.Peripheral.RCC.RegTypes,
                        Ivory.BSP.STM32.Peripheral.RCC.Regs,
 
+                       Ivory.BSP.STM32.Peripheral.SYSCFG,
+                       Ivory.BSP.STM32.Peripheral.SYSCFG.Regs,
+
                        Ivory.BSP.STM32.Peripheral.SPI,
                        Ivory.BSP.STM32.Peripheral.SPI.Regs,
                        Ivory.BSP.STM32.Peripheral.SPI.RegTypes,
@@ -109,6 +112,15 @@ library
                        Ivory.BSP.STM32.Driver.RNG,
 
                        Ivory.BSP.STM32.Driver.DMA,
+
+                       Ivory.BSP.STM32F042.GPIO,
+                       Ivory.BSP.STM32F042.GPIO.AF,
+                       Ivory.BSP.STM32F042.GPIO.Ports,
+                       Ivory.BSP.STM32F042.GPIO.Pins,
+                       Ivory.BSP.STM32F042.MemoryMap,
+                       Ivory.BSP.STM32F042.RCC,
+                       Ivory.BSP.STM32F042.CAN,
+                       Ivory.BSP.STM32F042.Interrupt
 
                        Ivory.BSP.STM32F303.MemoryMap,
                        Ivory.BSP.STM32F303.Interrupt,
@@ -175,4 +187,3 @@ library
                        tower >= 0.9
 
   ghc-options:         -Wall
-

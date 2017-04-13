@@ -39,6 +39,15 @@ import Ivory.BSP.STM32F303.Peripheral.RCC.RegTypes
   }
 |]
 
+[ivory|
+ bitdata RCC_CR2 :: Bits 32 = rcc_cr2
+  { _                 :: Bits 14
+  , rcc_cr2_hsi48_rdy :: Bit
+  , rcc_cr2_hsi48_on  :: Bit
+  , _                 :: Bits 16
+  }
+|]
+
 -- Clock Configuration Register ------------------------------------------------
 
 [ivory|

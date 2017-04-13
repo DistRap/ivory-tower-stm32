@@ -192,8 +192,8 @@ canInit periph bitrate rxpin txpin clockconfig = do
   forM_ [rxpin, txpin] $ \ p -> do
     pinEnable        p
     pinSetOutputType p gpio_outputtype_pushpull
-    pinSetPUPD       p gpio_pupd_none
-    pinSetAF         p gpio_af9 -- All CAN peripherals connect to af9
+    pinSetPUPD       p gpio_pupd_pulldown
+    pinSetAF         p gpio_af4 -- All CAN peripherals connect to af9
     pinSetMode       p gpio_mode_af
 
   modifyReg (canRegMCR periph) $ do

@@ -29,16 +29,15 @@ makefile STM32Config{..} userobjs = Root $ artifactString "Makefile" $ unlines
   , "  -Wno-unused-function \\"
   , "  -Wno-unused-variable \\"
   , "  -mlittle-endian \\"
-  , "  -mthumb -mcpu=cortex-m4 \\"
-  , "  -mfloat-abi=hard -mfpu=fpv4-sp-d16 \\"
+  , "  -DCORTEX_USE_FPU=FALSE -DTHUMB_PRESENT -mthumb -mthumb-interwork -mcpu=cortex-m4  -MD -MP -MF  \\"
+  , " \\"
   , "  -DIVORY_TEST \\"
   , "  -DIVORY_USER_ASSERT_HOOK \\"
   , "  -I."
   , ""
   , "LDFLAGS := \\"
-  , "  -mlittle-endian \\"
-  , "  -mthumb -mcpu=cortex-m4 \\"
-  , "  -mfloat-abi=hard -mfpu=fpv4-sp-d16"
+  , "  -mthumb -mlittle-endian \\"
+  , "  -mcpu=cortex-m0"
   , "LDLIBS := -lm"
   , ""
   , "OBJDIR := obj"
@@ -75,7 +74,7 @@ makefile STM32Config{..} userobjs = Root $ artifactString "Makefile" $ unlines
     Nothing -> ""
     Just px4vers -> unlines
       [ "image.px4: bl_image.bin"
-      , "\tpython px_mkfw.py --prototype=" ++ px4vers_prototype px4vers 
+      , "\tpython px_mkfw.py --prototype=" ++ px4vers_prototype px4vers
             ++ "  --image=$< > $@"
       , ""
       , "bl_image.bin: bl_image"
@@ -113,7 +112,7 @@ artifacts STM32Config{..} =
               (px_python ++ ["support/" ++ px4vers_prototype px4vers])
 
   mk_lds name bl_offset = Root $ linker_script name stm32config_processor bl_offset reset_handler
-  px_python = [ "support/px_mkfw.py", "support/px_uploader.py"] 
+  px_python = [ "support/px_mkfw.py", "support/px_uploader.py"]
 
 px4vers_prototype :: PX4Version -> String
 px4vers_prototype PX4FMU_v1 = "px4fmu-v1.prototype"

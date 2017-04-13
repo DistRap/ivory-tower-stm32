@@ -1,6 +1,6 @@
 	.syntax unified
 	.thumb
-	.cpu cortex-m3
+	.cpu cortex-m0
 	.fpu softvfp
 
 
@@ -33,5 +33,3 @@ $entries$
 	.size g_vectors, .-g_vectors
 
 $weakdefs$
-
-

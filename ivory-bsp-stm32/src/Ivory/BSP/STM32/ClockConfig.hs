@@ -28,7 +28,7 @@ data ClockConfig =
 
 clockSourceHz :: ClockSource -> Integer
 clockSourceHz (External rate) = rate
-clockSourceHz Internal        = 16 * 1000 * 1000
+clockSourceHz Internal        = 8 * 1000 * 1000
 
 clockSysClkHz :: ClockConfig -> Integer
 clockSysClkHz
@@ -79,6 +79,15 @@ externalXtalPLL xtal_mhz sysclk_mhz pllconf = ClockConfig
   , clockconfig_pclk2_divider = 2 -- APB2 div 2
   }
 
+internalXtal :: Integer -> PLLFactor -> ClockConfig
+internalXtal sysclk_mhz pllconf = ClockConfig
+  { clockconfig_source = Internal
+  , clockconfig_pll = pllconf
+  , clockconfig_hclk_divider = 1
+  , clockconfig_pclk1_divider = 1 -- APB1 div 1
+  , clockconfig_pclk2_divider = 2 -- APB2 div 2
+  }
+
 externalXtal :: Integer -> Integer -> ClockConfig
 externalXtal xtal_mhz sysclk_mhz = externalXtalPLL xtal_mhz sysclk_mhz
     PLLFactor
@@ -88,6 +97,18 @@ externalXtal xtal_mhz sysclk_mhz = externalXtalPLL xtal_mhz sysclk_mhz
       , pll_q = 7
       }
   where p = 2
+
+internalXtalF0 sysclk_mhz = internalXtal sysclk_mhz
+    PLLMFactor
+      { pllm_m = 2 -- HSE div 1 or 2
+      , pllm_n = 12 -- PLLMUL
+      }
+
+externalXtalF0 xtal_mhz sysclk_mhz = externalXtalPLL xtal_mhz sysclk_mhz
+    PLLMFactor
+      { pllm_m = 1 -- HSE div 1 or 2
+      , pllm_n = 9 -- PLLMUL
+      }
 
 externalXtalF3 xtal_mhz sysclk_mhz = externalXtalPLL xtal_mhz sysclk_mhz
     PLLMFactor
@@ -100,4 +121,3 @@ clockConfigParser = do
   xtal_mhz   <- subsection "xtalMHz" integer
   sysclk_mhz <- subsection "sysclkMHz" (integer `withDefault` 168)
   return (externalXtal xtal_mhz sysclk_mhz)
-

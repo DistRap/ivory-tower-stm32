@@ -68,101 +68,90 @@
 */
 
 
-#ifndef FREERTOS_CONFIG_H
-#define FREERTOS_CONFIG_H
+#ifndef PORTMACRO_H
+#define PORTMACRO_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*-----------------------------------------------------------
- * Application specific definitions.
+ * Port specific definitions.
  *
- * These definitions should be adjusted for your particular hardware and
- * application requirements.
+ * The settings in this file configure FreeRTOS correctly for the
+ * given hardware and compiler.
  *
- * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
- * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
- *
- * See http://www.freertos.org/a00110.html.
- *----------------------------------------------------------*/
+ * These settings should not be altered.
+ *-----------------------------------------------------------
+ */
 
-/* Ensure stdint is only used by the compiler, and not the assembler. */
-#ifdef __ICCARM__
-	#include <stdint.h>
-	extern uint32_t SystemCoreClock;
-#endif
+/* Type definitions. */
+#define portCHAR		char
+#define portFLOAT		float
+#define portDOUBLE		double
+#define portLONG		long
+#define portSHORT		short
+#define portSTACK_TYPE	uint32_t
+#define portBASE_TYPE	long
 
-#define configUSE_PREEMPTION			1
-#define configUSE_IDLE_HOOK				0
-#define configUSE_TICK_HOOK				0
-#define configCPU_CLOCK_HZ				( $cpu_clock_hz$ )
-#define configTICK_RATE_HZ				( ( TickType_t ) $tick_rate_hz$ )
-#define configMAX_PRIORITIES			( $max_priorities$ )
-#define configMINIMAL_STACK_SIZE		( ( unsigned short ) $minimal_stack_size$ )
-#define configTOTAL_HEAP_SIZE			( ( size_t ) 4000 )
-#define configMAX_TASK_NAME_LEN			( 16 )
-#define configUSE_TRACE_FACILITY		0
-#define configUSE_16_BIT_TICKS			0
-#define configIDLE_SHOULD_YIELD			1
-#define configUSE_MUTEXES				1
-#define configQUEUE_REGISTRY_SIZE		0
-#define configCHECK_FOR_STACK_OVERFLOW	2
-#define configUSE_RECURSIVE_MUTEXES		0
-#define configUSE_MALLOC_FAILED_HOOK	0
-#define configUSE_APPLICATION_TASK_TAG	0
-#define configUSE_COUNTING_SEMAPHORES	0
-#define configGENERATE_RUN_TIME_STATS	0
+typedef portSTACK_TYPE StackType_t;
+typedef long BaseType_t;
+typedef unsigned long UBaseType_t;
 
-/* Co-routine definitions. */
-#define configUSE_CO_ROUTINES 		0
-#define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
-
-/* Software timer definitions. */
-#define configUSE_TIMERS				0
-#define configTIMER_TASK_PRIORITY		( 2 )
-#define configTIMER_QUEUE_LENGTH		10
-#define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE * 2 )
-
-/* Set the following definitions to 1 to include the API function, or zero
-to exclude the API function. */
-#define INCLUDE_vTaskPrioritySet		1
-#define INCLUDE_uxTaskPriorityGet		1
-#define INCLUDE_vTaskDelete				1
-#define INCLUDE_vTaskCleanUpResources	1
-#define INCLUDE_vTaskSuspend			1
-#define INCLUDE_vTaskDelayUntil			1
-#define INCLUDE_vTaskDelay				1
-
-/* Cortex-M specific definitions. */
-#ifdef __NVIC_PRIO_BITS
-	/* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
-	#define configPRIO_BITS       		__NVIC_PRIO_BITS
+#if( configUSE_16_BIT_TICKS == 1 )
+	typedef uint16_t TickType_t;
+	#define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	#define configPRIO_BITS       		4        /* 15 priority levels */
+	typedef uint32_t TickType_t;
+	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+
+	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+	not need to be guarded with a critical section. */
+	#define portTICK_TYPE_IS_ATOMIC 1
+#endif
+/*-----------------------------------------------------------*/
+
+/* Architecture specifics. */
+#define portSTACK_GROWTH			( -1 )
+#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT			8
+/*-----------------------------------------------------------*/
+
+
+/* Scheduler utilities. */
+extern void vPortYield( void );
+#define portNVIC_INT_CTRL_REG		( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
+#define portNVIC_PENDSVSET_BIT		( 1UL << 28UL )
+#define portYIELD()					vPortYield()
+#define portEND_SWITCHING_ISR( xSwitchRequired ) if( xSwitchRequired ) portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT
+#define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
+/*-----------------------------------------------------------*/
+
+
+/* Critical section management. */
+extern void vPortEnterCritical( void );
+extern void vPortExitCritical( void );
+extern uint32_t ulSetInterruptMaskFromISR( void ) __attribute__((naked));
+extern void vClearInterruptMaskFromISR( uint32_t ulMask )  __attribute__((naked));
+
+#define portSET_INTERRUPT_MASK_FROM_ISR()		ulSetInterruptMaskFromISR()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vClearInterruptMaskFromISR( x )
+#define portDISABLE_INTERRUPTS()				__asm volatile 	( " cpsid i " )
+#define portENABLE_INTERRUPTS()					__asm volatile 	( " cpsie i " )
+#define portENTER_CRITICAL()					vPortEnterCritical()
+#define portEXIT_CRITICAL()						vPortExitCritical()
+
+/*-----------------------------------------------------------*/
+
+/* Task function macros as described on the FreeRTOS.org WEB site. */
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
+#define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
+
+#define portNOP()
+
+#ifdef __cplusplus
+}
 #endif
 
-/* The lowest interrupt priority that can be used in a call to a "set priority"
-function. */
-#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY			0xf
+#endif /* PORTMACRO_H */
 
-/* The highest interrupt priority that can be used by any interrupt service
-routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
-INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
-PRIORITY THAN THIS! (higher priorities are lower numeric values. */
-#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	5
-
-/* Interrupt priorities used by the kernel port layer itself.  These are generic
-to all Cortex-M ports, and do not rely on any particular library functions. */
-#define configKERNEL_INTERRUPT_PRIORITY 		( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
-/* !!!! configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to zero !!!!
-See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
-
-/* Normal assert() semantics without relying on the provision of an assert.h
-header file. */
-#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
-
-/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
-standard names. */
-#define vPortSVCHandler SVCall_Handler
-#define xPortPendSVHandler PendSV_Handler
-#define xPortSysTickHandler SysTick_Handler
-
-#endif /* FREERTOS_CONFIG_H */

@@ -36,7 +36,7 @@ import Ivory.Language
  | rcc_cfgr_mco_hsi        as 5
  | rcc_cfgr_mco_hse        as 6
  | rcc_cfgr_mco_pll        as 7 -- divided by 1 or 2 depending on PLLNODIV
- 
+
  bitdata RCC_MCOPre   :: Bits 3
  = rcc_cfgr_mcopre_div1   as 0
  | rcc_cfgr_mcopre_div2   as 1
@@ -73,9 +73,10 @@ import Ivory.Language
   | rcc_hpre_div512   as 15 -- 0b1111
 
  bitdata RCC_SYSCLK   :: Bits 2
-  = rcc_sysclk_hsi    as 0
-  | rcc_sysclk_hse    as 1
-  | rcc_sysclk_pll    as 2
+  = rcc_sysclk_hsi     as 0
+  | rcc_sysclk_hse     as 1
+  | rcc_sysclk_pll     as 2
+  | rcc_sysclk_i48mhz  as 3
 
 
  bitdata RCC_PLLSRC   :: Bits 2

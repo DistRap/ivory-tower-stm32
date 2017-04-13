@@ -58,8 +58,8 @@ kernelfiles =
   , "freertos-sources/include/task.h"
   , "freertos-sources/include/timers.h"
   , "freertos-sources/include/deprecated_definitions.h"
-  , "freertos-sources/portable/GCC/ARM_CM4F/port.c"
-  , "freertos-sources/portable/GCC/ARM_CM4F/portmacro.h"
+  , "freertos-sources/portable/GCC/ARM_CM0/port.c"
+  , "freertos-sources/portable/GCC/ARM_CM0/portmacro.h"
   , "freertos-sources/portable/MemMang/heap_1.c"
   , "syscalls/assert.h"
   , "syscalls/syscalls.c"
@@ -74,10 +74,9 @@ sources = filter (\f -> takeExtension f == ".c")
 
 defaultConfig :: Config
 defaultConfig  = Config
-  { cpu_clock_hz       = 168 * 1000 * 1000
+  { cpu_clock_hz       = 48 * 1000 * 1000
   , tick_rate_hz       = 1000
   , max_priorities     = 5
-  , minimal_stack_size = 256
-  , total_heap_size    = 64 * 1024
+  , minimal_stack_size = 128
+  , total_heap_size    = 2 * 1024
   }
-

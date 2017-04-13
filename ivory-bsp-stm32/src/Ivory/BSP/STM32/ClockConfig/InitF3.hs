@@ -60,7 +60,8 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
     clearBit rcc_cir_lse_rdyie
     clearBit rcc_cir_lsi_rdyie
   case clockconfig_source cc of
-    Internal -> return ()
+    Internal -> do
+      modifyReg (rcc_reg_cr2 rcc) $ setBit rcc_cr2_hsi48_on
     External _ -> do
       -- Enable HSE
       modifyReg (rcc_reg_cr rcc) $ setBit rcc_cr_hse_on
@@ -109,16 +110,16 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
     PLLMFactor{..} ->
       modifyReg (rcc_reg_cfgr rcc) $ do
                     setBit   rcc_cfgr_pllnodiv
-                    setField rcc_cfgr_pllsrc rcc_cfgr_pllsrc_hse_div1
-                    setField rcc_cfgr_pllmul rcc_cfgr_pllmul_x9
+                    setField rcc_cfgr_pllsrc rcc_cfgr_pllsrc_hsi_div2
+                    setField rcc_cfgr_pllmul rcc_cfgr_pllmul_x12
 
-  -- Enable main PLL:
-  modifyReg (rcc_reg_cr rcc) $ do
-    setBit rcc_cr_pll_on
-  -- Spin until RCC->CR PLLRDY bit is high
-  forever $ do
-    cr <- getReg (rcc_reg_cr rcc)
-    when (bitToBool (cr #. rcc_cr_pll_rdy)) $ breakOut
+  -- -- Enable main PLL:
+  -- modifyReg (rcc_reg_cr rcc) $ do
+  --   setBit rcc_cr_pll_on
+  -- -- Spin until RCC->CR PLLRDY bit is high
+  -- forever $ do
+  --   cr <- getReg (rcc_reg_cr rcc)
+  --   when (bitToBool (cr #. rcc_cr_pll_rdy)) $ breakOut
 
   -- Configure flash prefetch, instruction cache, data cache, wait state 5
   modifyReg (flash_reg_acr flash) $ do
@@ -126,14 +127,14 @@ init_clocks clockconfig = proc "init_clocks" $ body $ do
     setBit flash_acr_dc_en
     setField flash_acr_latency (fromRep 5)
 
-  -- Select main PLL as system clock source
+  -- Select main Interal 48Mhz as system clock source
   modifyReg (rcc_reg_cfgr rcc) $ do
-    setField rcc_cfgr_sw rcc_sysclk_pll
+    setField rcc_cfgr_sw rcc_sysclk_i48mhz
 
-  -- Spin until main PLL is ready:
+  -- Spin until internal 48MHz xtal is ready:
   forever $ do
     cfgr <- getReg (rcc_reg_cfgr rcc)
-    when ((cfgr #. rcc_cfgr_sws) ==? rcc_sysclk_pll) $ breakOut
+    when ((cfgr #. rcc_cfgr_sws) ==? rcc_sysclk_i48mhz) $ breakOut
 
   where
   cc = clockconfig

@@ -6,7 +6,7 @@ MEMORY
 }
 _estack = $estack$;
 _min_heap_size = 0;
-_min_stack_size = 0x400;
+_min_stack_size = 0x200;
 OUTPUT_ARCH(arm)
 ENTRY($reset_handler$)
 SECTIONS
@@ -65,7 +65,7 @@ SECTIONS
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
     _edata = ABSOLUTE(.);
-  } > ccsram AT > flash
+  } > sram AT > flash
   . = ALIGN(4);
   .bss : {
     _sbss = ABSOLUTE(.);
@@ -84,7 +84,7 @@ SECTIONS
     . = . + _min_heap_size;
     . = . + _min_stack_size;
     . = ALIGN(4);
-  } > ccsram
+  } > sram
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }
   .stab.excl 0 : { *(.stab.excl) }

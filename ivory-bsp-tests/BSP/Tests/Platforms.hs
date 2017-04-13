@@ -18,12 +18,18 @@ module BSP.Tests.Platforms
   , px4fmuv17
   , px4fmuv17_ioar
   , px4fmuv24
+  , f0discovery
+  , f3discovery
   , f4discovery
   , open407vc
   ) where
 
 import Ivory.Tower.Config
 import Data.Char (toUpper)
+
+import qualified Ivory.BSP.STM32F042.GPIO        as F042
+import qualified Ivory.BSP.STM32F042.GPIO.AF     as F042
+import qualified Ivory.BSP.STM32F042.CAN         as F042
 
 import qualified Ivory.BSP.STM32F303.UART        as F303
 import qualified Ivory.BSP.STM32F303.GPIO        as F303
@@ -64,6 +70,7 @@ testPlatformParser = do
   case map toUpper p of
     "PX4FMUV17"       -> result px4fmuv17
     "PX4FMUV17_IOAR"  -> result px4fmuv17_ioar
+    "F0DISCOVERY"     -> result f0discovery
     "F3DISCOVERY"     -> result f3discovery
     "F4DISCOVERY"     -> result f4discovery
     "OPEN407VC"       -> result open407vc
@@ -109,6 +116,12 @@ data TestCAN =
     , testCANFilters :: CANPeriphFilters
     }
 
+data TestHX711 =
+  TestHX711
+    { testSCK      :: GPIOPin
+    , testDT       :: GPIOPin
+    }
+
 data TestDMA =
   TestDMA
     { testDMAUARTPeriph :: DMAUART
@@ -122,6 +135,7 @@ data TestPlatform =
     , testplatform_spi   :: TestSPI
     , testplatform_i2c   :: TestI2C
     , testplatform_can   :: TestCAN
+    , testplatform_hx711 :: TestHX711
     , testplatform_dma   :: TestDMA
     , testplatform_rng   :: RNG
     , testplatform_stm32 :: STM32Config
@@ -182,6 +196,43 @@ px4fmuv17_ioar = px4fmuv17
     }
   }
 
+---------- F0Discovery --------------------------------------------------------
+
+f0discovery :: TestPlatform
+f0discovery = TestPlatform
+  { testplatform_leds = ColoredLEDs
+    { redLED  = LED F042.pinA0 ActiveHigh
+    , blueLED = LED F042.pinA0 ActiveHigh
+    }
+-- , testplatform_uart = TestUART
+--     { testUARTPeriph = F405.uart1
+--     , testUARTPins = UARTPins
+--         { uartPinTx = F405.pinB6
+--         , uartPinRx = F405.pinB7
+--         , uartPinAF = F405.gpio_af_uart1
+--         }
+--     }
+-- , testplatform_spi = TestSPI
+--     { testSPIPeriph = F405.spi3
+--     , testSPIPins   = spi3_pins
+--     }
+-- , testplatform_i2c = TestI2C
+--     { testI2C = F405.i2c1
+--     , testI2CPins = I2CPins
+--       { i2cpins_sda = F405.pinB6
+--       , i2cpins_scl = F405.pinB7
+--       }
+--     }
+, testplatform_can = TestCAN
+    { testCAN = F042.can1
+    , testCANRX = F042.pinA11 -- A9
+    , testCANTX = F042.pinA12 -- A10
+    , testCANFilters = F042.canFilters
+    }
+-- , testplatform_dma = error "DMA tests not supported on this platform"
+-- , testplatform_rng = F405.rng
+  , testplatform_stm32 = stm32f042Defaults 8
+  }
 
 ---------- F3Discovery --------------------------------------------------------
 
@@ -253,6 +304,10 @@ f4discovery = TestPlatform
       , testCANRX = F405.pinD0
       , testCANTX = F405.pinD1
       , testCANFilters = F405.canFilters
+      }
+  , testplatform_hx711 = TestHX711
+      { testSCK = F405.pinE0
+      , testDT  = F405.pinE1
       }
   , testplatform_dma = error "DMA tests not supported on this platform"
   , testplatform_rng = F405.rng
@@ -394,4 +449,3 @@ px4fmuv24 = TestPlatform
     , uartPinRx = F427.pinD6
     , uartPinAF = F427.gpio_af_uart2
     }
-

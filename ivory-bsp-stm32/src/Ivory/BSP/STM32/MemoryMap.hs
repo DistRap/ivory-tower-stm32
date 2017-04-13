@@ -17,7 +17,7 @@ apb2_periph_base = periph_base + 0x00010000
 
 ahb1_periph_base, ahb2_periph_base :: Integer
 ahb1_periph_base = periph_base + 0x00020000
-ahb2_periph_base = periph_base + 0x10000000
+ahb2_periph_base = periph_base + 0x08000000
 
 -- APB1 Peripherals
 pwr_periph_base :: Integer
@@ -25,7 +25,6 @@ pwr_periph_base = apb1_periph_base + 0x7000
 
 -- AHB1 Peripherals
 rcc_periph_base :: Integer
-rcc_periph_base = ahb1_periph_base + 0x3800
+rcc_periph_base = ahb1_periph_base + 0x1000
 flash_r_periph_base :: Integer
-flash_r_periph_base = ahb1_periph_base + 0x3C00
-
+flash_r_periph_base = ahb1_periph_base + 0x2000
