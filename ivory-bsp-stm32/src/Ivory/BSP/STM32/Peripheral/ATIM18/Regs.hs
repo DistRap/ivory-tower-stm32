@@ -213,6 +213,13 @@ import Ivory.BSP.STM32.Peripheral.ATIM18.RegTypes
 |]
 
 [ivory|
+ bitdata ATIM_RCR          :: Bits 32 = atim_rcr
+  { _                      :: Bits 25
+  , atim_rcr_rcr           :: Bits 7
+  }
+|]
+
+[ivory|
  bitdata ATIM_16           :: Bits 32 = atim_16
   { _                      :: Bits 16
   , atim_16_data           :: Bits 16
