@@ -52,6 +52,9 @@ library
                        Ivory.BSP.STM32.Peripheral.DMA.Peripheral,
                        Ivory.BSP.STM32.Peripheral.DMA.Artifacts,
 
+                       Ivory.BSP.STM32.Peripheral.EXTI,
+                       Ivory.BSP.STM32.Peripheral.EXTI.Regs,
+
                        Ivory.BSP.STM32.Peripheral.Flash,
                        Ivory.BSP.STM32.Peripheral.Flash.Regs,
 
@@ -82,6 +85,10 @@ library
                        Ivory.BSP.STM32.Peripheral.SPI.Regs,
                        Ivory.BSP.STM32.Peripheral.SPI.RegTypes,
                        Ivory.BSP.STM32.Peripheral.SPI.Peripheral,
+
+                       Ivory.BSP.STM32.Peripheral.SYSCFG,
+                       Ivory.BSP.STM32.Peripheral.SYSCFG.Regs,
+                       Ivory.BSP.STM32.Peripheral.SYSCFG.RegTypes,
 
                        Ivory.BSP.STM32.Peripheral.UART,
                        Ivory.BSP.STM32.Peripheral.UART.Types,
@@ -123,6 +130,8 @@ library
                        Ivory.BSP.STM32F405.UART,
                        Ivory.BSP.STM32F405.RNG,
                        Ivory.BSP.STM32F405.ADC
+                       Ivory.BSP.STM32F405.EXTI,
+                       Ivory.BSP.STM32F405.SYSCFG,
 
                        Ivory.BSP.STM32F427.MemoryMap,
                        Ivory.BSP.STM32F427.Interrupt,
