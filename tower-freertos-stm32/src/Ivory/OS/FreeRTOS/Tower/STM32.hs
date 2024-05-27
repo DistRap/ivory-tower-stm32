@@ -266,14 +266,20 @@ stm32Artifacts nmcu@(name, mcu) cc ast ms gcas = (systemArtifacts ast ms) ++ as
              , let f = artifactFileName a
              , takeExtension f == ".c"
              ]
+
+  numThreads :: Integer
+  numThreads = fromIntegral $ length (AST.towerThreads ast)
+
+  taskStackSize = stackSizeByRam (mcuRam mcu)
+
   fconfig = FreeRTOS.defaultConfig
-    { FreeRTOS.max_priorities = fromIntegral (length (AST.towerThreads ast)) + 1
-    -- (arbitrarily) leave half the sram for the stack and static
-    -- allocations; this should be a config
-    , FreeRTOS.total_heap_size = (fromIntegral (mcuRam mcu)) `div` 2
-    -- XXX expand tower config to fill in the rest of these values
+    { FreeRTOS.max_priorities = numThreads + 1
+    -- Task stack is allocated from FreeRTOS heap.
+    -- This used to be half of the mcuRam but now
+    -- uses a hopefully better heuristic
+    , FreeRTOS.total_heap_size = taskStackSize * (numThreads + 1) * 2
     , FreeRTOS.cpu_clock_hz = clockSysClkHz cc
-    , FreeRTOS.task_stack_size = stackSizeByRam (mcuRam mcu)
+    , FreeRTOS.task_stack_size = taskStackSize
     }
 
 -- just a guess, use smaller stack size on devices
