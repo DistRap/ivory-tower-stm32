@@ -82,7 +82,7 @@ makefile mcu userobjs = Root $ artifactString "Makefile" $ unlines
   objects = userobjs ++  ["stm32_freertos_init.o", "vector_table.o", "stm32_freertos_user_assert.o"]
 
 artifacts :: NamedMCU -> [Located Artifact]
-artifacts nmcu@(_name, mcu) =
+artifacts nmcu =
   [ vector_table nmcu ]
   ++ init_artifacts
   ++ instrArtifacts
