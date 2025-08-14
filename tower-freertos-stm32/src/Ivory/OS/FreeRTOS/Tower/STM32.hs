@@ -278,7 +278,7 @@ stm32Artifacts nmcu@(name, mcu) cc ast ms gcas = (systemArtifacts ast ms) ++ as
     -- This used to be half of the mcuRam but now
     -- uses a hopefully better heuristic
     , FreeRTOS.total_heap_size = taskStackSize * (numThreads + 1) * 2
-    , FreeRTOS.cpu_clock_hz = clockSysClkHz cc
+    , FreeRTOS.cpu_clock_hz = clockHClkHz cc
     , FreeRTOS.task_stack_size = taskStackSize
     }
 
